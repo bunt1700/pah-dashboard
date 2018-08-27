@@ -2,11 +2,13 @@
     <div class="sidebar-collapse">
         <ul class="nav metismenu" id="side-menu">
             <li class="nav-header">
-                <div class="dropdown profile-element">
-                    <img alt="image" class="rounded-circle" src="img/profile_small.jpg"/>
-                    <a data-toggle="dropdown" class="dropdown-toggle" href="#">
-                        <span class="block m-t-xs font-bold">Mark Bunt</span>
-                        <span class="text-muted text-xs block">productaanhuis<b class="caret"></b></span>
+                <div class="dropdown profile-element row">
+                    <div class="col-lg-4">
+                        <img alt="image" class="rounded-circle" src="img/profile_small.jpg"/>
+                    </div>
+                    <a data-toggle="dropdown" class="dropdown-toggle col-lg-8" href="#">
+                        <span class="block m-t-xs font-bold">Mark Bunt <b class="caret"></b></span>
+                        <span class="text-muted text-xs block">@productaanhuis</span>
                     </a>
                     <ul class="dropdown-menu animated fadeInRight m-t-xs">
                         <li><a class="dropdown-item" href="profile.html">Profiel</a></li>

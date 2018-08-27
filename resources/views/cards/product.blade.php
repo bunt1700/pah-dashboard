@@ -16,7 +16,7 @@
                             @foreach ($product->attributes->slice(0, 3) as $attribute)
                                 <tr>
                                     <td>{{ $attribute->name }}:</td>
-                                    <td>{{ $attribute }}</td>
+                                    <td>{{ (string)$attribute }}</td>
                                 </tr>
                             @endforeach
                         </table>

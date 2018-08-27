@@ -25,8 +25,12 @@
                     <div class="form-group">
                         <label class="col-form-label" for="status">Categorie</label>
                         <select name="status" id="status" class="form-control">
-                            <option value="1" selected>Enabled</option>
-                            <option value="0">Disabled</option>
+                            <option selected value="">Categorie&hellip;</option>
+                            @foreach ($categories as $category)
+                                <option value="{{ $category->id }}">
+                                    {{ $category->name }}
+                                </option>
+                            @endforeach
                         </select>
                     </div>
                 </div>
@@ -34,8 +38,7 @@
                     <div class="form-group">
                         <label class="col-form-label" for="status">Subcategorie</label>
                         <select name="status" id="status" class="form-control">
-                            <option value="1" selected>Enabled</option>
-                            <option value="0">Disabled</option>
+                            <option selected value="">Subcategorie&hellip;</option>
                         </select>
                     </div>
                 </div>
@@ -43,8 +46,7 @@
                     <div class="form-group">
                         <label class="col-form-label" for="status">Productgroup</label>
                         <select name="status" id="status" class="form-control">
-                            <option value="1" selected>Enabled</option>
-                            <option value="0">Disabled</option>
+                            <option selected value="">Productgroep&hellip;</option>
                         </select>
                     </div>
                 </div>

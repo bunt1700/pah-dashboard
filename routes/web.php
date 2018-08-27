@@ -11,5 +11,13 @@
 |
 */
 
+	use Illuminate\Support\Facades\Route;
+
 	Route::get('/', 'HomepageController@index')->name('homepage');
 	Route::get('/products/', 'ProductListController@index')->name('productlist');
+
+	Route::prefix('/data/')->group(function() {
+		Route::get('/categories.json', 'DataController@categories');
+		Route::get('/subcategories-{category}.json', 'DataController@subcategories');
+		Route::get('/productgroups-{subcategory}.json', 'DataController@productgroups');
+	});

@@ -31,12 +31,6 @@ class Model extends BaseModel
         return $value;
     }
 
-    // Tell Eloquent to load models by slug
-    public function getRouteKeyName()
-    {
-        return 'slug';
-    }
-
     const CREATED_AT = 'created';
 
     const UPDATED_AT = 'updated';
