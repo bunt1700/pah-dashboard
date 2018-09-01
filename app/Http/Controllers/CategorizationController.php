@@ -1,0 +1,73 @@
+<?php
+
+	namespace App\Http\Controllers;
+
+	use App\Category;
+	use App\Subcategory;
+	use App\Productgroup;
+	use Illuminate\Http\Request;
+
+	class CategorizationController extends Controller
+	{
+		/** @var Productgroup|null */
+		protected $productgroup = null;
+
+		/** @var Subcategory|null */
+		protected $subcategory = null;
+
+		public function __construct(Request $request) {
+			parent::__construct( 'Categorieën' );
+
+			if($request->isMethod('POST')) {
+				$this->productgroup = Productgroup::get($request->request->get('selected-productgroups'));
+				$this->subcategory = $this->productgroup->subcategory;
+			}
+
+			$this->data['activeSubcategory'] = $this->subcategory;
+			$this->data['activeProductgroup'] = $this->productgroup;
+		}
+
+		public function index()
+		{
+			$data = [
+				'categories' => Category::all(),
+			];
+
+			return $this->render('categories', $data);
+		}
+
+		public function edit(Category $category)
+		{
+			$this->title[] = $category->name;
+
+			$data = [
+				'categories' => Category::all(),
+				'subcategories' => $category->subcategories,
+				'activeCategory' => $category,
+			];
+
+			if($this->subcategory) {
+				$data['productgroups'] = $this->subcategory->productgroups;
+			}
+
+			return $this->render('edit-category', $data);
+		}
+
+		public function save(Category $category, Request $request)
+		{
+			$parameters = $request->request;
+
+			if($target = $parameters->get('combined-productgroups')) {
+
+			} else if($target = $parameters->get('new-subcategories')) {
+				$subcategory = Subcategory::get($target);
+
+				if($subcategory instanceof Subcategory) {
+					$this->productgroup->setAttribute('subcategory_id', $subcategory->id);
+					$this->productgroup->save();
+				}
+			}
+
+			return redirect(route('categorization.form', [$category]));
+		}
+	}

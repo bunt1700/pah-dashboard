@@ -110,3 +110,4 @@
         new Chart(ctx, {type: 'line', data: lineData, options:lineOptions});
     });
 </script>
+@stack('scripts')

@@ -35,7 +35,7 @@
                 </a>
                 <ul class="nav nav-second-level collapse">
                     <li><a href="{{ route('productlist') }}">Producten</a></li>
-                    <li><a href="ecommerce_product_list.html">Categorie&euml;n</a></li>
+                    <li><a href="{{ route('categorization') }}">Categorie&euml;n</a></li>
                 </ul>
             </li>
         </ul>

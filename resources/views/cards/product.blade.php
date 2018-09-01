@@ -1,16 +1,18 @@
 <div class="col-md-3">
     <div class="ibox">
         <div class="ibox-content product-box">
-            <div class="product-imitation">
-                x
-            </div>
+            <img class="product-image" src="{{ $product->image }}">
             <div class="product-desc">
                 <span class="product-price">{{ $product->offer->price }}</span>
                 <small class="text-muted">{{ $product->productgroup }}</small>
                 <a href="#" class="product-name">{{ $product->name }}</a>
                 <div class="small m-t-xs">
                     @if ($product->description)
-                        {{ $product->description }}
+                        @if(strlen($product->description) > 120)
+                            {{ substr($product->description, 0, 120) }}&hellip;
+                        @else
+                            {{ $product->description }}
+                        @endif
                     @else
                         <table>
                             @foreach ($product->attributes->slice(0, 3) as $attribute)

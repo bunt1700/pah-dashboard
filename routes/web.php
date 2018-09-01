@@ -14,7 +14,13 @@
 	use Illuminate\Support\Facades\Route;
 
 	Route::get('/', 'HomepageController@index')->name('homepage');
-	Route::get('/products/', 'ProductListController@index')->name('productlist');
+	Route::any('/products', 'ProductListController@index')->name('productlist');
+
+	Route::prefix('/categorization/')->group(function() {
+		Route::get('/', 'CategorizationController@index')->name('categorization');
+		Route::any('/{category}', 'CategorizationController@edit')->name('categorization.form');
+		Route::post('/{category}/save', 'CategorizationController@save')->name('categorization.submit');
+	});
 
 	Route::prefix('/data/')->group(function() {
 		Route::get('/categories.json', 'DataController@categories');

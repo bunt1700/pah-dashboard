@@ -17,6 +17,11 @@ use Illuminate\Database\Eloquent\Model as BaseModel;
  */
 class Model extends BaseModel
 {
+	public static function get($key): ?self {
+		$instance = new static();
+		return $instance->resolveRouteBinding($key);
+	}
+
     // Overriding Eloquent's getter because ProNoob13 dislikes the snake_case naming scheme
     public function __get($key)
     {
@@ -30,8 +35,4 @@ class Model extends BaseModel
 
         return $value;
     }
-
-    const CREATED_AT = 'created';
-
-    const UPDATED_AT = 'updated';
 }
