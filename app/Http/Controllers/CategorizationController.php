@@ -58,16 +58,37 @@
 			$parameters = $request->request;
 
 			if($target = $parameters->get('combined-productgroups')) {
-			    $productgroup = Productgroup::get($target);
+			    $log = fopen(dirname(__DIR__, 3) . '/storage/logs/migrations.log', 'a');
 
-			    if($productgroup instanceof Productgroup) {
-			        foreach($this->productgroup->products as $product) {
-			            $product->setAttribute('productgroup_id', $productgroup->id);
-			            $product->save();
+			    if(is_resource($log)) {
+                    $productgroup = Productgroup::get($target);
+
+                    if ($productgroup instanceof Productgroup) {
+                        $before = count($productgroup->products);
+                        $products = count($this->productgroup->products);
+
+                        foreach ($this->productgroup->products as $product) {
+                            $product->setAttribute('productgroup_id', $productgroup->id);
+                            $product->save();
+                        }
+
+                        fputcsv(
+                            $log,
+                            [
+                                time(),
+                                date('c'),
+                                $this->productgroup->id,
+                                $this->productgroup->name,
+                                $products,
+                                $productgroup->id,
+                                $productgroup->name,
+                                $before,
+                            ]
+                        );
+
+                        $this->productgroup->delete();
+                        $this->productgroup = $productgroup;
                     }
-
-                    $this->productgroup->delete();
-			        $this->productgroup = $productgroup;
                 }
 			} else if($target = $parameters->get('new-subcategories')) {
 				$subcategory = Subcategory::get($target);
