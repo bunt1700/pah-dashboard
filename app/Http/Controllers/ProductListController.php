@@ -11,7 +11,7 @@
 	class ProductListController extends Controller
 	{
 		public function __construct() {
-			parent::__construct('Producten');
+			$this->title[] = 'Producten';
 		}
 
 		public function index(Request $request): Response

@@ -15,15 +15,10 @@ class Controller extends BaseController
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
     /** @var string[] */
-    protected $title;
+    protected $title = [];
 
     /** @var array */
     protected $data = [];
-
-	public function __construct(string ...$title)
-	{
-		$this->title = $title;
-	}
 
 	// Abstraction because we want the title to be set on all pages
 	protected function render(string $template, array $parameters = [], int $status = 200): Response

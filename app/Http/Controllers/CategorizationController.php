@@ -16,7 +16,7 @@
 		protected $subcategory = null;
 
 		public function __construct(Request $request) {
-			parent::__construct( 'Categorieën' );
+			$this->title[] = 'Categorieën';
 
 			if($request->isMethod('POST')) {
 				$this->productgroup = Productgroup::get($request->request->get('selected-productgroups'));
@@ -58,7 +58,17 @@
 			$parameters = $request->request;
 
 			if($target = $parameters->get('combined-productgroups')) {
+			    $productgroup = Productgroup::get($target);
 
+			    if($productgroup instanceof Productgroup) {
+			        foreach($this->productgroup->products as $product) {
+			            $product->setAttribute('productgroup_id', $productgroup->id);
+			            $product->save();
+                    }
+
+                    $this->productgroup->delete();
+			        $this->productgroup = $productgroup;
+                }
 			} else if($target = $parameters->get('new-subcategories')) {
 				$subcategory = Subcategory::get($target);
 
