@@ -25,12 +25,12 @@
                     @endif
                 </div>
                 <div class="m-t text-right">
-                    <a href="ecommerce_product.html" class="btn btn-xs btn-outline">
+                    <a href="https://dev.productaanhuis.nl/product/{{ $product->slug }}" target="_blank" class="btn btn-xs btn-outline">
                         Bekijken
                     </a>
-                    <a href="ecommerce_product.html" class="btn btn-xs btn-outline btn-primary">
-                        Bewerken <i class="fa fa-long-arrow-right"></i>
-                    </a>
+                    {{--<a href="ecommerce_product.html" class="btn btn-xs btn-outline btn-primary">--}}
+                        {{--Bewerken <i class="fa fa-long-arrow-right"></i>--}}
+                    {{--</a>--}}
                 </div>
             </div>
         </div>

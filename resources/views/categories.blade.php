@@ -26,8 +26,9 @@
                             <thead>
                                 <tr>
                                     <th data-toggle="true">Categorienaam</th>
-                                    <th data-hide="phone,tablet">Aantal productgroepen</th>
-                                    <th data-hide="phone">Aantal producten</th>
+                                    {{--<th data-hide="phone,tablet">Aantal productgroepen</th>--}}
+                                    {{--<th data-hide="phone">Aantal producten</th>--}}
+
                                     <th class="text-right" data-sort-ignore="true">Acties</th>
                                 </tr>
                             </thead>
@@ -35,8 +36,8 @@
                                 <tbody>
                                     <tr>
                                         <td>{{ $category->name }}</td>
-                                        <td>&nbsp;</td>
-                                        <td>&nbsp;</td>
+                                        {{--<td>&nbsp;</td>--}}
+                                        {{--<td>&nbsp;</td>--}}
                                         <td class="text-right">
                                             <div class="btn-group">
                                                 <a href="{{ route('categorization.form', [$category]) }}" class="btn-white btn btn-xs">
