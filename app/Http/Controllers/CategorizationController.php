@@ -111,17 +111,22 @@
 		protected function log(Model $target, Model $destination): void
         {
             if($this->logfile === null) {
-                $this->logfile = @fopen(storage_path('logs/migraitons.log'), 'a');
+                $this->logfile = @fopen(storage_path('logs/categorization.log'), 'a');
             }
             if(!is_resource($this->logfile)) {
                 throw new RuntimeException('Unable to open Migration log');
             }
+
+            $source = $target->productgroup ?? $target->subcategory;
 
             $entry = [
                 date('c'),
                 get_class($target),
                 $target->id,
                 $target->name,
+                get_class($source),
+                $source->id,
+                $source->name,
                 get_class($destination),
                 $destination->id,
                 $destination->name,
