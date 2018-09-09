@@ -63,30 +63,15 @@ class DropdownFilter extends Filter {
     }
 
     updateOptions(data) {
+        this.element.innerHTML = '';
+
         for(let i = 0; i < Math.max(data.length, this.element.children.length + 1); i++) {
-            let child = this.element.children[i + 1];
+            let child = document.createElement('option');
 
-            if (i < data.length) {
-                if (child instanceof HTMLOptionElement) {
-                    if (child.innerText != data[i].name) {
-                        let modified = document.createElement('option');
+            child.value = data[i].id;
+            child.innerText = data[i].name;
 
-                        modified.value = data[i].id;
-                        modified.innerText = data[i].name;
-
-                        this.element.replaceChild(modified, child);
-                    }
-                } else {
-                    let addition = document.createElement('option');
-
-                    addition.value = data[i].id;
-                    addition.innerText = data[i].name;
-
-                    this.element.add(addition);
-                }
-            } else if(child) {
-                this.element.removeChild(child);
-            }
+            this.element.add(child);
         }
 
         this.element.disabled = false;
