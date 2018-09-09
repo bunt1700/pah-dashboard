@@ -3,17 +3,23 @@
 	namespace App\Http\Controllers;
 
 	use App\Category;
-	use App\Subcategory;
+    use App\Model;
+    use App\Product;
+    use App\Subcategory;
 	use App\Productgroup;
 	use Illuminate\Http\Request;
+    use RuntimeException;
 
-	class CategorizationController extends Controller
+    class CategorizationController extends Controller
 	{
 		/** @var Productgroup|null */
 		protected $productgroup = null;
 
 		/** @var Subcategory|null */
 		protected $subcategory = null;
+
+		/** @var resource|null */
+		protected $logfile = null;
 
 		public function __construct(Request $request) {
 			$this->title[] = 'Categorieën';
@@ -64,41 +70,70 @@
                     $productgroup = Productgroup::get($target);
 
                     if ($productgroup instanceof Productgroup) {
-                        $before = count($productgroup->products);
-                        $products = count($this->productgroup->products);
-
-                        foreach ($this->productgroup->products as $product) {
-                            $product->setAttribute('productgroup_id', $productgroup->id);
-                            $product->save();
-                        }
-
-                        fputcsv(
-                            $log,
-                            [
-                                time(),
-                                date('c'),
-                                $this->productgroup->id,
-                                $this->productgroup->name,
-                                $products,
-                                $productgroup->id,
-                                $productgroup->name,
-                                $before,
-                            ]
-                        );
-
-                        $this->productgroup->delete();
-                        $this->productgroup = $productgroup;
+                        $this->productgroup = $this->merge($this->productgroup, $productgroup);
                     }
                 }
 			} else if($target = $parameters->get('new-subcategories')) {
 				$subcategory = Subcategory::get($target);
 
 				if($subcategory instanceof Subcategory) {
-					$this->productgroup->setAttribute('subcategory_id', $subcategory->id);
-					$this->productgroup->save();
+				    $this->productgroup = $this->move($this->productgroup, $subcategory);
 				}
 			}
 
 			return redirect(route('categorization.form', [$category]));
 		}
+
+        protected function move(Productgroup $target, Subcategory $destination): Productgroup
+        {
+            $target->setAttribute('subcategory_id', $destination->id);
+            $target->save();
+
+            $this->log($target, $destination);
+
+            return $target;
+        }
+
+		protected function merge(Productgroup $target, Productgroup $destination): Productgroup
+        {
+            foreach ($target->products as $product) {
+                $product->setAttribute('productgroup_id', $destination->id);
+                $product->save();
+
+                $this->log($product, $destination);
+            }
+
+            $target->delete();
+
+            return $destination;
+        }
+
+		protected function log(Model $target, Model $destination): void
+        {
+            if($this->logfile === null) {
+                $this->logfile = @fopen(storage_path('logs/migraitons.log'), 'a');
+            }
+            if(!is_resource($this->logfile)) {
+                throw new RuntimeException('Unable to open Migration log');
+            }
+
+            $entry = [
+                date('c'),
+                get_class($target),
+                $target->id,
+                $target->name,
+                get_class($destination),
+                $destination->id,
+                $destination->name,
+            ];
+
+            fputcsv($this->logfile, $entry);
+        }
+
+        public function __destruct()
+        {
+            if($this->logfile === null) {
+                fclose($this->logfile);
+            }
+        }
 	}
