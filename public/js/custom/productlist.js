@@ -63,7 +63,9 @@ class DropdownFilter extends Filter {
     }
 
     updateOptions(data) {
-        this.element.innerHTML = '';
+        for(let i = 1; i < this.element.children.length; i++) {
+            this.element.removeChild(this.element.children[i]);
+        }
 
         for(let i = 0; i < data.length; i++) {
             let child = document.createElement('option');
