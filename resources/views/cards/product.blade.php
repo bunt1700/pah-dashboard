@@ -25,7 +25,7 @@
                     @endif
                 </div>
                 <div class="m-t text-right">
-                    <a href="{{ $_SERVER['REQUEST_METHOD'] }}://dev.productaanhuis.nl/product/{{ $product->slug }}" target="_blank" class="btn btn-xs btn-outline">
+                    <a href="//dev.productaanhuis.nl/product/{{ $product->slug }}" target="_blank" class="btn btn-xs btn-outline">
                         Bekijken
                     </a>
                     {{--<a href="ecommerce_product.html" class="btn btn-xs btn-outline btn-primary">--}}
