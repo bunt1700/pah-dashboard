@@ -63,7 +63,7 @@
                     $subcategory->category()->associate($category);
 
                     if ($category->subcategories()->save($subcategory)) {
-                        $this->subcategory = $subcategory;
+                        $this->subcategory = null;
                     }
                 }
             }
