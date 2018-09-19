@@ -17,7 +17,7 @@ class Category extends NameModel
 
     public function subcategories()
     {
-        return $this->hasMany('App\Subcategory')->whereHas('productgroups');
+        return $this->hasMany('App\Subcategory');
     }
 
     public function productgroups()

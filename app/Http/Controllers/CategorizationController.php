@@ -8,6 +8,7 @@
     use App\Subcategory;
 	use App\Productgroup;
 	use Illuminate\Http\Request;
+    use Illuminate\Support\Arr;
     use RuntimeException;
 
     class CategorizationController extends Controller
@@ -24,27 +25,68 @@
 		public function __construct(Request $request) {
 			$this->title[] = 'Categorieën';
 
-			if($request->isMethod('POST')) {
-				$this->productgroup = Productgroup::get($request->request->get('selected-productgroups'));
-				$this->subcategory = $this->productgroup->subcategory;
-			}
+            $this->data['activeSubcategory'] = &$this->subcategory;
+            $this->data['activeProductgroup'] = &$this->productgroup;
 
-			$this->data['activeSubcategory'] = $this->subcategory;
-			$this->data['activeProductgroup'] = $this->productgroup;
+			if($request->isMethod('POST')) {
+			    $data = $request->request;
+
+                if($this->productgroup = Productgroup::get($data->get('selected-productgroup'))) {
+                    $this->subcategory = $this->productgroup->subcategory;
+                } else {
+                    $this->subcategory = Subcategory::get($data->get('selected-subcategory'));
+                }
+			}
 		}
 
 		public function index()
 		{
-			$data = [
-				'categories' => Category::all(),
-			];
-
-			return $this->render('categories', $data);
+			return $this->render('categories', ['categories' => Category::all()]);
 		}
 
-		public function edit(Category $category)
+		public function edit(Category $category, Request $request)
 		{
 			$this->title[] = $category->name;
+			$parameters = $request->request;
+
+            if($name = trim($parameters->get('new-subcategory'))) {
+                $this->subcategory = Subcategory::query()
+                    ->where('category_id', $category->id)
+                    ->where('name', $name)
+                    ->first();
+
+                if(!$this->subcategory) {
+                    $subcategory = new Subcategory();
+
+                    $subcategory->name = $name;
+                    $subcategory->slug = str_slug($name);
+                    $subcategory->category()->associate($category);
+
+                    if ($category->subcategories()->save($subcategory)) {
+                        $this->subcategory = $subcategory;
+                    }
+                }
+            }
+
+            if($name = trim($parameters->get('new-productgroup'))) {
+                $this->productgroup = Productgroup::query()
+                    ->where('subcategory_id', $this->subcategory->id)
+                    ->where('name', $name)
+                    ->first();
+
+                if(!$this->productgroup) {
+                    $productgroup = new Productgroup();
+
+                    $productgroup->name = $name;
+                    $productgroup->slug = str_slug($name);
+                    $productgroup->subcategory()->associate($this->subcategory);
+
+                    if($this->subcategory->productgroups()->save($productgroup)) {
+                        $this->subcategory = null;
+                        $this->productgroup = null;
+                    }
+                }
+            }
 
 			$data = [
 				'categories' => Category::all(),
@@ -63,17 +105,13 @@
 		{
 			$parameters = $request->request;
 
-			if($target = $parameters->get('combined-productgroups')) {
-			    $log = fopen(dirname(__DIR__, 3) . '/storage/logs/migrations.log', 'a');
+			if($target = $parameters->get('target-productgroup')) {
+                $productgroup = Productgroup::get($target);
 
-			    if(is_resource($log)) {
-                    $productgroup = Productgroup::get($target);
-
-                    if ($productgroup instanceof Productgroup) {
-                        $this->productgroup = $this->merge($this->productgroup, $productgroup);
-                    }
+                if ($productgroup instanceof Productgroup) {
+                    $this->productgroup = $this->merge($this->productgroup, $productgroup);
                 }
-			} else if($target = $parameters->get('new-subcategories')) {
+			} else if($target = $parameters->get('target-subcategory')) {
 				$subcategory = Subcategory::get($target);
 
 				if($subcategory instanceof Subcategory) {
@@ -86,7 +124,7 @@
 
         protected function move(Productgroup $target, Subcategory $destination): Productgroup
         {
-            $target->setAttribute('subcategory_id', $destination->id);
+            $target->subcategory()->associate($destination);
             $target->save();
 
             $this->log($target, $destination);
@@ -97,7 +135,7 @@
 		protected function merge(Productgroup $target, Productgroup $destination): Productgroup
         {
             foreach ($target->products as $product) {
-                $product->setAttribute('productgroup_id', $destination->id);
+                $product->productgroup()->associate($destination);
                 $product->save();
 
                 $this->log($product, $destination);
@@ -137,7 +175,7 @@
 
         public function __destruct()
         {
-            if($this->logfile === null) {
+            if($this->logfile !== null) {
                 fclose($this->logfile);
             }
         }

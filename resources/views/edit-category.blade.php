@@ -28,16 +28,16 @@
     <div class="wrapper wrapper-content animated fadeInRight ecommerce">
         <div class="ibox-content m-b-sm border-bottom">
 			<h3>{{ $activeCategory }}</h3>
-            <form method="POST" id="selection">
+            <form method="POST" class="selection">
                 {{ csrf_field() }}
                 <div class="row">
                     <div class="col-sm-5">
                         <div class="form-group">
-                            <label class="col-form-label">Subcategorie</label>
+                            <label class="col-form-label">Bestaande subcategorie</label>
                             @if($activeSubcategory)
                                 <input value="{{ $activeSubcategory }}" readonly class="form-control">
                             @else
-                                <select name="selected-subcategories" class="form-control">
+                                <select name="selected-subcategory" class="form-control">
                                     @foreach($subcategories as $subcategory)
                                         <option value="{{ $subcategory->id }}">
                                             {{ $subcategory->name }}
@@ -49,28 +49,62 @@
                     </div>
                     <div class="col-sm-5">
                         <div class="form-group">
-                            <label class="col-form-label">Productgroep</label>
-                            @if($activeProductgroup)
-                                <input value="{{ $activeProductgroup }}" readonly class="form-control">
-                            @else
-                                <select name="selected-productgroups" class="form-control">
-                                </select>
-                            @endif
+                            <label class="col-form-label">Nieuwe subcategorie</label>
+                            <input name="new-subcategory" class="form-control"@if($activeSubcategory) disabled @endif>
                         </div>
                     </div>
                     <div class="col-sm-2">
                         <div class="form-group">
                             <label class="col-form-label">&nbsp;</label>
                             <div>
-                                @if($activeProductgroup)
-                                    <a href="{{ route('categorization.form', [$activeCategory]) }}" class="btn btn-outline-secondary">
-                                        Deselecteren
-                                    </a>
-                                @else
-                                    <button class="btn btn-primary">
-                                        Selecteren
-                                    </button>
-                                @endif
+
+                                <button class="btn btn-primary"@if($activeSubcategory) disabled @endif>
+                                    Selecteren
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="ibox-content m-b-sm border-bottom">
+            <h3>{{ $activeSubcategory ?? 'Productgroep' }}</h3>
+            <form method="POST" class="selection">
+                {{ csrf_field() }}
+                @if($activeSubcategory)
+                    <input type="hidden" name="selected-subcategory" value="{{ $activeSubcategory->id }}">
+                @endif
+                <div class="row">
+                    <div class="col-sm-5">
+                        <div class="form-group">
+                            <label class="col-form-label">Bestaande productgroep</label>
+                            @if(!$activeSubcategory)
+                                <input disabled class="form-control">
+                            @elseif($activeProductgroup)
+                                <input value="{{ $activeProductgroup }}" readonly class="form-control">
+                            @else
+                                <select name="selected-productgroup" class="form-control">
+                                    @foreach($productgroups as $productgroup)
+                                        <option value="{{ $productgroup->id }}">{{ $productgroup->name }}</option>
+                                    @endforeach
+                                </select>
+                            @endif
+                        </div>
+                    </div>
+                    <div class="col-sm-5">
+                        <div class="form-group">
+                            <label class="col-form-label">Nieuwe productgroep</label>
+                            <input name="new-productgroup" class="form-control"@if(!$activeSubcategory || $activeProductgroup) disabled @endif>
+                        </div>
+                    </div>
+                    <div class="col-sm-2">
+                        <div class="form-group">
+                            <label class="col-form-label">&nbsp;</label>
+                            <div>
+                                <button class="btn btn-primary"@if($activeProductgroup) disabled @endif>
+                                    Selecteren
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -83,14 +117,14 @@
             <form method="POST" action="{{ route('categorization.submit', [$activeCategory]) }}" id="modifications">
                 {{ csrf_field() }}
                 @if($activeProductgroup)
-                    <input type="hidden" name="selected-productgroups" value="{{ $activeProductgroup->id }}">
+                    <input type="hidden" name="selected-productgroup" value="{{ $activeProductgroup->id }}">
                 @endif
                 <div class="row">
                     <div class="col-sm-5">
                         <div class="form-group">
                             <label class="col-form-label">Categorie</label>
                             @if($activeProductgroup)
-                                <select name="new-categories" class="form-control">
+                                <select name="target-category" class="form-control">
                                     @foreach($categories as $category)
                                         @if($category->id == $activeCategory->id)
                                             <option value="{{ $category->id }}" selected>{{ $category->name }}</option>
@@ -108,7 +142,7 @@
                         <div class="form-group">
                             <label class="col-form-label">Subcategorie</label>
                             @if($activeProductgroup)
-                                <select name="new-subcategories" class="form-control">
+                                <select name="target-subcategory" class="form-control">
                                 </select>
                             @else
                                 <input disabled class="form-control">
@@ -134,14 +168,14 @@
             <form method="POST" action="{{ route('categorization.submit', [$activeCategory]) }}" id="merging">
                 {{ csrf_field() }}
                 @if($activeProductgroup)
-                    <input type="hidden" name="selected-productgroups" value="{{ $activeProductgroup->id }}">
+                    <input type="hidden" name="selected-productgroup" value="{{ $activeProductgroup->id }}">
                 @endif
                 <div class="row">
                     <div class="col-sm-5">
                         <div class="form-group">
                             <label class="col-form-label">Productgroep</label>
-                            @isset($productgroups)
-                                <select name="combined-productgroups" class="form-control">
+                            @if($activeProductgroup)
+                                <select name="target-productgroup" class="form-control">
                                     @foreach($productgroups as $productgroup)
                                         @if($productgroup->id == $activeProductgroup->id)
                                             <option value="{{ $productgroup->id }}" disabled>
@@ -156,7 +190,7 @@
                                 </select>
                             @else
                                 <input disabled class="form-control">
-                            @endisset
+                            @endif
                         </div>
                     </div>
                     <div class="col-sm-5">&nbsp;</div>

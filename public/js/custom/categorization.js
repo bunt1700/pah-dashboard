@@ -20,10 +20,6 @@ class Dropdown {
         } else if(previous !== null) {
             throw new Error('The previous sibling given should be Dropdown or null');
         }
-
-        if(!previous && element.children.length === 0) {
-            this.reloadOptions();
-        }
     }
 
     onChange() {
@@ -41,15 +37,18 @@ class Dropdown {
     }
 
     reloadOptions(source) {
-        let ID = '';
+        let filename = this.name;
+
+        filename = filename.replace(/y$/, 'ie');
+        filename += 's';
 
         this.element.disabled = true;
 
         if(source instanceof Dropdown) {
-            ID += '-' + source.element.selectedOptions[0].value;
+            filename += '-' + source.element.selectedOptions[0].value;
         }
 
-        $.getJSON('/data/' + this.name + ID + '.json', (data) => this.updateOptions(data));
+        $.getJSON('/data/' + filename + '.json', (data) => this.updateOptions(data));
     }
 
     updateOptions(data) {
@@ -68,14 +67,56 @@ class Dropdown {
     }
 }
 
-class Categorization {
-    constructor(selectionForm, modificationForm) {
-        this.selectionForm = selectionForm;
-        this.modificationForm = modificationForm;
+class Inputbox {
+    constructor(element, button, sibling) {
+        if(element instanceof HTMLInputElement) {
+            element.addEventListener('keyup', () => this.onChange());
+        } else {
+            throw new Error('Invalid input element supplied!');
+        }
+
+        if(button instanceof HTMLButtonElement) {
+            this.button = button;
+        } else {
+            throw new Error('Invalid button element supplied!');
+        }
+
+        this.filled = false;
+        this.sibling = null;
+        this.element = element;
+
+        if(sibling instanceof HTMLSelectElement) {
+            this.sibling = sibling;
+        }
+
+        if(this.element.value) {
+            this.onChange();
+        }
     }
 
-    registerSelector(name, previous) {
-        let select = this.selectionForm.elements.namedItem('selected-' + name);
+    onChange() {
+        let filled = (this.element.value.trim().length > 0);
+
+        if(filled !== this.filled) {
+            this.button.innerText = filled ? 'Aanmaken' : 'Selecteren';
+
+            if(this.sibling) {
+                this.sibling.disabled = filled;
+            }
+
+            this.filled = filled;
+        }
+    }
+}
+
+class Categorization {
+    constructor(modificationForm, selectionForms) {
+        this.modificationForm = modificationForm;
+        this.selectionForms = selectionForms;
+    }
+
+    registerModifier(name, previous) {
+        let select = this.modificationForm.elements.namedItem('target-' + name);
 
         if(select) {
             return new Dropdown(name, select, previous);
@@ -84,29 +125,39 @@ class Categorization {
         return null;
     }
 
-    registerModifier(name, previous) {
-        let select = this.modificationForm.elements.namedItem('new-' + name);
+    registerSelector(name) {
+        let input = null;
+        let button = null;
+        let sibling = null;
 
-        if(select) {
-            return new Dropdown(name, select, previous);
+        for(let i = 0; i < this.selectionForms.length; i++) {
+            input = this.selectionForms[i].elements.namedItem('new-' + name);
+
+            if(input) {
+                button = this.selectionForms[i].getElementsByTagName('button').item(0);
+                sibling = this.selectionForms[i].getElementsByTagName('select').item(0);
+                break;
+            }
+        }
+
+        if(input) {
+            return new Inputbox(input, button, sibling);
         }
 
         return null;
     }
 }
 
-let previous = null;
 let categorization = new Categorization(
-    document.getElementById('selection'),
-    document.getElementById('modifications')
+    document.getElementById('modifications'),
+    document.getElementsByClassName('selection')
 );
 
-previous = null;
-['subcategories', 'productgroups'].forEach((name) => {
-    previous = categorization.registerSelector(name, previous);
+let previous = null;
+['category', 'subcategory'].forEach((name) => {
+    previous = categorization.registerModifier(name, previous);
 });
 
-previous = null;
-['categories', 'subcategories'].forEach((name) => {
-    previous = categorization.registerModifier(name, previous);
+['subcategory', 'productgroup'].forEach((name) => {
+    categorization.registerSelector(name);
 });
